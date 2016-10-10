@@ -1,0 +1,51 @@
+# NOTE: Block sequences indicate each entry with a dash and space ("- ").
+
+# Mappings use a colon and space (": ") to mark each key: value pair.
+
+
+- name: systime
+  frenc: 3600
+  timeout: 10
+
+- name: sysname
+  frenc: 86400
+  timeout: 10
+
+- name: sysload
+  frenc: 22
+  timeout: 7
+
+# syscpuidle timeout should greater than or equal 6 seconds
+- name: syscpuidle
+  frenc: 15
+  timeout: 10
+
+- name: sysdiskinfo
+  frenc: 300
+  timeout: 10
+
+# sysifstat timeout should greater than or equal 6 seconds
+- name: sysifstat
+  frenc: 15
+  timeout: 10
+
+- name: syscorenum
+  frenc: 86400
+  timeout: 10
+
+- name: sysuptime
+  frenc: 86400
+  timeout: 10
+
+- name: sysprocnum
+  frenc: 60
+  timeout: 10
+
+- name: sysmeminfo
+  frenc: 60
+  timeout: 10
+
+# iops timeout should greater than or equal 6 seconds
+- name: sysiops
+  frenc: 15
+  timeout: 10

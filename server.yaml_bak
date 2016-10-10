@@ -1,0 +1,26 @@
+# NOTE: Mappings use a colon and space (": ") to mark each key: value pair.
+
+# sn number. unique identifier for this machine.
+sn: xxxxxxxxx
+
+# proxy server ip address
+proxyaddr: 172.16.140.92
+# proxy server port
+proxyport: 3929
+
+# reserve proxy server address
+proxyaddr1: 172.16.140.92
+# reserve proxy server port
+proxyport1: 3929
+
+# retry times send data to proxy server
+retries: 3
+
+#batch send frquency
+batchsend_frequency: 3600
+
+#thread number of thread pool
+thread_num: 20
+
+# heartbeat frequency
+heartbeat_frequency: 3600
