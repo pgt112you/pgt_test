@@ -19,6 +19,7 @@ int main() {
     int pid = fork();
 
     printf("111 pid is %d\n", getpid());
+    sleep(300);
     if (pid > 0) {
         pthread_join(tid1, NULL);
         pthread_join(tid2, NULL);

@@ -9,8 +9,8 @@ class Test {
     Test(int ii);
     Test();
     ~Test();
-    void *operator new(size_t t);
-    void operator delete(void *ptr);
+    static void *operator new(size_t t);
+    static void operator delete(void *ptr);
 };
 
 
@@ -54,5 +54,7 @@ int main() {
         cout << "in catch " << ii << endl;
     }
     // Test *pt1 = new Test(-8);  // 如果不抛异常会aborted
+    Test *pt1 = new Test(8);  
+    delete pt1;
     return 0;
 }

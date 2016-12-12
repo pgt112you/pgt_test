@@ -17,7 +17,8 @@
 
 void *thr_fn1(void *arg) {
   struct timeval tv;
-  tv.tv_sec = 5;
+  //tv.tv_sec = 5;
+  tv.tv_sec = 50;
   tv.tv_usec = 0;
   printf("%ld before now time is %d\n", (int)pthread_self(), time(NULL));
   select(1, NULL, NULL, NULL, &tv);
@@ -28,7 +29,8 @@ void *thr_fn1(void *arg) {
 void *thr_fn2(void *arg) {
   printf("%ld now time is %d\n", (int)pthread_self(), time(NULL));
   struct timeval tv;
-  tv.tv_sec = 3;
+  //tv.tv_sec = 3;
+  tv.tv_sec = 30;
   tv.tv_usec = 0;
   printf("%ld before now time is %d\n", (int)pthread_self(), time(NULL));
   select(1, NULL, NULL, NULL, &tv);

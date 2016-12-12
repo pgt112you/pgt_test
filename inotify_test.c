@@ -1,65 +1,83 @@
-/*This is the sample program to notify us for the file creation and file deletion takes place in “/tmp” directory*/
-#include <stdio.h>
-#include <stdlib.h>
-#include <errno.h>
+#include "pgt_test.h"
+#include <sys/epoll.h>
+#include <sys/inotify.h>
 #include <sys/types.h>
-#include <linux/inotify.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
-#define EVENT_SIZE  ( sizeof (struct inotify_event) )
-#define EVENT_BUF_LEN     ( 1024 * ( EVENT_SIZE + 16 ) )
 
-int main( )
-{
-  int length, i = 0;
-  int fd;
-  int wd;
-  char buffer[EVENT_BUF_LEN];
+#define MAX_EVENTS 10
 
-  /*creating the INOTIFY instance*/
-  fd = inotify_init();
 
-  /*checking for error*/
-  if ( fd < 0 ) {
-    perror( "inotify_init" );
-  }
-
-  /*adding the “/tmp” directory into watch list. Here, the suggestion is to validate the existence of the directory before adding into monitoring list.*/
-  wd = inotify_add_watch( fd, "/tmp", IN_CREATE | IN_DELETE );
-
-  /*read to determine the event change happens on “/tmp” directory. Actually this read blocks until the change event occurs*/ 
-
-  length = read( fd, buffer, EVENT_BUF_LEN ); 
-
-  /*checking for error*/
-  if ( length < 0 ) {
-    perror( "read" );
-  }  
-
-  /*actually read return the list of change events happens. Here, read the change event one by one and process it accordingly.*/
-  while ( i < length ) {     struct inotify_event *event = ( struct inotify_event * ) &buffer[ i ];     if ( event->len ) {
-      if ( event->mask & IN_CREATE ) {
-        if ( event->mask & IN_ISDIR ) {
-          printf( "New directory %s created.\n", event->name );
-        }
-        else {
-          printf( "New file %s created.\n", event->name );
-        }
-      }
-      else if ( event->mask & IN_DELETE ) {
-        if ( event->mask & IN_ISDIR ) {
-          printf( "Directory %s deleted.\n", event->name );
-        }
-        else {
-          printf( "File %s deleted.\n", event->name );
-        }
-      }
+void deal_fd(int ffd, int fd, int wd) {
+    const struct inotify_event *event;
+    char buf[4096];
+    int len = read(fd, buf, 4096);
+    if (len < 0) {
+        return;
     }
-    i += EVENT_SIZE + event->len;
-  }
-  /*removing the “/tmp” directory from the watch list.*/
-   inotify_rm_watch( fd, wd );
+    char *ptr;
+    for (ptr = buf; ptr < buf + len; ptr += sizeof(struct inotify_event) + event->len) {
+        event = (const struct inotify_event *) ptr;
+        if (!(event->mask & IN_MODIFY)) {
+            continue;      
+        }
+        if (event->wd == wd)
+            break;
+    }
 
-  /*closing the INOTIFY instance*/
-   close( fd );
+    char *content[4096];
+    while(1) {
+        bzero(content, 4096);
+        printf("----------------------------------------------------------------\n");
+        len = read(ffd, content, 4096);
+        printf("================================================================\n");
+        printf("%s", content);
+        //if (len < 4096) {
+        if (len <= 0) {
+            break;
+        }
+    }
+
+    return;
+}
+
+
+
+
+int main() {
+    int fd;
+    int wd;
+    fd = inotify_init1(IN_NONBLOCK);
+    wd = inotify_add_watch(fd, "/home/guangtong/pgt_test/inotify_test.dat", IN_MODIFY|IN_CLOSE_WRITE);
+    int ffd = open("/home/guangtong/pgt_test/inotify_test.dat", O_RDONLY|O_CREAT|O_NONBLOCK);
+    lseek(ffd, -50, SEEK_END);
+
+    struct epoll_event ev, events[MAX_EVENTS];
+    int epollfd = epoll_create1(0);
+    ev.events = EPOLLIN;
+    ev.data.fd = fd;
+    epoll_ctl(epollfd, EPOLL_CTL_ADD, fd, &ev);
+
+    int nfds, n;
+    while(1) {
+        nfds = epoll_wait(epollfd, events, MAX_EVENTS, -1);
+        if (nfds == -1) {
+            perror("epoll_wait");
+            exit(0);
+        }
+        for (n=0; n<nfds; ++n) {
+            printf(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
+            if (events[n].data.fd == fd) {
+                deal_fd(ffd, fd, wd);
+                break;
+            }
+        }
+
+    }
+
+
+
+
 
 }
