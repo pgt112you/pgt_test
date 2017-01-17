@@ -5,9 +5,14 @@ import (
     "time"
 )
 
+
+
+var nt = time.Now()
+
 func main() {
     fmt.Println("When's Wednesday?")
     today := time.Now().Weekday()
+    fmt.Println("net is ", nt)
     switch time.Wednesday {
     case today + 2:
         fmt.Println("In two days.")
@@ -36,4 +41,8 @@ func main() {
     var ss string
     ss = fmt.Sprintf("hello world month %02d\n", time.Now().Month())
     fmt.Println(ss)
+
+    dt := time.Date(2017, 1, 23, 15, 3, 2, 2, time.UTC)
+    fmt.Println(dt)
+    fmt.Printf("%d%d", dt.Year()%10, (dt.Month()-1)/3)
 }
