@@ -1,8 +1,8 @@
 package main
 
 import (
-    "fmt"
-    "time"
+	"fmt"
+	"time"
 )
 
 
@@ -10,6 +10,7 @@ import (
 var nt = time.Now()
 
 func main() {
+<<<<<<< HEAD
     fmt.Println("When's Wednesday?")
     today := time.Now().Weekday()
     fmt.Println("net is ", nt)

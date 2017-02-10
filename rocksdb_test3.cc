@@ -1,6 +1,7 @@
 #include <iostream>
 #include "rocksdb/db.h"
 #include "rocksdb/utilities/backupable_db.h"
+#include "rocksdb/slice.h"
 
 
 using namespace std;
@@ -29,8 +30,17 @@ int main() {
     s = db->Put(rocksdb::WriteOptions(), "SHANDONG-linyi", "danongcun");
     s = db->Put(rocksdb::WriteOptions(), "SHANDONG-qufu", "pianzi");
     s = db->Put(rocksdb::WriteOptions(), "SHANDONGSHENG", "province");
-    /*
+
+
     rocksdb::Iterator* it = db->NewIterator(rocksdb::ReadOptions());
+    Slice sl("SHANDONG");
+    it->Seek(sl);
+    cout << "hello world" << endl;
+    for (; it->Valid(); it->Next()) {
+        cout << it->key().ToString() << ": " << it->value().ToString() << endl;    
+    }
+    cout << "hello world 11" << endl;
+    /*
     for (it->SeekToFirst(); it->Valid(); it->Next()) {
         cout << it->key().ToString() << ": " << it->value().ToString() << endl;    
     }
@@ -39,7 +49,7 @@ int main() {
     cout << "hello world 11" << endl;
     */
     
-
+    delete it;
     delete db;
 
     return 0;
