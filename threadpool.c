@@ -67,7 +67,7 @@ void push_task(void *(*task_fn)(void *), void *task_arg) {
   pthread_mutex_unlock(&taskq_lock);
 
   pthread_cond_signal(&qready);
-  printf("in push_task after send signal\n");
+  //printf("in push_task after send signal\n");
   return;
 }
 
@@ -90,15 +90,15 @@ void *work_fn(void *arg) {
     taskq = task_item->next;
     --current_task_num;
     pthread_mutex_unlock(&taskq_lock);
-    printf("in work_fn upcoming to call function\n");
+    //printf("in work_fn upcoming to call function\n");
     if (task_item == NULL)
       printf("task_item is null\n");
-    printf("func addr is %x\n", task_item->task_fn);
+    //printf("func addr is %x\n", task_item->task_fn);
     (*(task_item->task_fn))(task_item->task_arg);
-    printf("in work_fn after to call function\n");
+    //printf("in work_fn after to call function\n");
     free(task_item);
   }
-  return;
+  return NULL;
 }
 
 
@@ -111,7 +111,7 @@ void create_worker(int work_num) {
   pthread_attr_init(&attr);
   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
   for(i=0; i<work_num; ++i) {
-    worker *p_worker = malloc(sizeof(worker));
+    worker *p_worker = (worker *)malloc(sizeof(worker));
     pthread_create(&(p_worker->tid), &attr, work_fn, NULL);
     pthread_mutex_lock(&workerq_lock);
     if (current_work_num == 0) {
@@ -273,7 +273,7 @@ void *create_manager(void *arg) {
     }
     pthread_mutex_unlock(&workerq_lock);
   }
-  return;
+  return NULL;
 }
 
 /*

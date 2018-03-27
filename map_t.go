@@ -49,4 +49,35 @@ func main() {
 	fmt.Printf("%v\n", m11)
 	fmt.Printf("%d\n", len(m11))
 
+	fmt.Println("==========================================================")
+	mt1 := make(map[int]int)
+	mt1[2] = 3
+	mt1[3] = 4
+	delete(mt1, 5)
+	delete(mt1, 3)
+	fmt.Println(mt1)
+
+	fmt.Println("==========================================================")
+	mtt1 := make(map[int]*TT)
+	mtt1[1] = &TT{i: 13, j: 14}
+	mtt1[2] = &TT{i: 23, j: 24}
+	mtt1[3] = &TT{i: 33, j: 34}
+	mtt1[4] = &TT{i: 43, j: 44}
+	for _, t := range mtt1 {
+		t.i += 100
+		t.j += 100
+	}
+	for k, t := range mtt1 {
+		if k == 2 {
+			delete(mtt1, 2)
+		}
+		fmt.Println(k, t.i, t.j)
+		fmt.Println(len(mtt1))
+	}
+
+	fmt.Println("==========================================================")
+	res, ok := mtt1[5]
+	fmt.Println(res, ok)
+	fmt.Println(len(mtt1))
+
 }

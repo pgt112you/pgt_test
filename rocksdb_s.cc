@@ -5,6 +5,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <sys/epoll.h>
+#include <sys/time.h>
 #include <iostream>
 #include <sstream>
 #include <unistd.h>
@@ -14,6 +15,8 @@
 #include "rocksdb/utilities/db_ttl.h"
 #include "rocksdb/merge_operator.h"
 #include "rocksdb/slice.h"
+#include "rocksdb/statistics.h"
+#include "rocksdb/convenience.h"
 
 
 using namespace std;
@@ -30,6 +33,10 @@ typedef struct {
 }trans;
 
 
+//std::string option_str = "write_buffer_size=8388608;level0_file_num_compaction_trigger=4;block_based_table_factory={cache_index_and_filter_blocks=true}"; // 这个写法是错误的，5.2.1里面各种options要分开写
+std::string option_str = "stats_dump_period_sec=30";
+std::string cf_option_str = "write_buffer_size=4096;level0_file_num_compaction_trigger=2;max_bytes_for_level_base=16384;max_bytes_for_level_multiplier=2";
+std::string block_option_str = "cache_index_and_filter_blocks=true";
 
 class MergeTestOperator : public AssociativeMergeOperator {
   public:
@@ -74,10 +81,13 @@ int main() {
     rocksdb::DB* db; 
     rocksdb::DBWithTTL* ttldb;
     rocksdb::Options options;
+    rocksdb::BlockBasedTableOptions block_options;
     options.create_if_missing = true;
     options.write_buffer_size = 1*1024;
-    options.merge_operator.reset(new MergeTestOperator);  // 数据库一旦用merge操作选项打开，并且有merge操作，那么之后这个数据库再次打开的时候，必须也要使用merge option打开，不然的话，目前已知seek的时候会报错
+    //options.merge_operator.reset(new MergeTestOperator);  // 数据库一旦用merge操作选项打开，并且有merge操作，那么之后这个数据库再次打开的时候，必须也要使用merge option打开，不然的话，目前已知seek的时候会报错
+    options.db_log_dir = "/data0/home/guangtong/pgt_test/rocksdb_dir/info_log";
     //rocksdb::Status status = rocksdb::DB::Open(options, "/data0/home/guangtong/pgt_test/rocksdb_dir", &db);    
+    options.statistics = rocksdb::CreateDBStatistics();
     rocksdb::Status status;
     BackupEngine* backup_engine = NULL;
     
@@ -143,10 +153,22 @@ int main() {
                 continue;
             }
 
-            printf("num is %d\n", num);
             // 操作rocksdb
             if (p->i == 101) {  // 建立数据库
                 cout << "hello" << endl;
+                status = rocksdb::GetDBOptionsFromString(options, option_str, &options);
+                if (!status.ok()) {
+                    cout << "get option failed " << status.ToString() << endl;
+                }
+                status = rocksdb::GetColumnFamilyOptionsFromString(options, cf_option_str, &options);
+                if (!status.ok()) {
+                    cout << "get cf option failed " << status.ToString() << endl;
+                }
+                status = rocksdb::GetBlockBasedTableOptionsFromString(block_options, block_option_str, &block_options);
+                if (!status.ok()) {
+                    cout << "get block option failed " << status.ToString() << endl;
+                }
+                options.table_factory.reset(NewBlockBasedTableFactory(block_options));
                 status = rocksdb::DB::Open(options, "/data0/home/guangtong/pgt_test/rocksdb_dir", &db);    
                 cout << "world" << endl;
                 if (!status.ok()) {
@@ -178,7 +200,8 @@ int main() {
                     cout << "insert key " << p->kbuf << " value " << p->vbuf << " failed " << endl;
                 }
                 else {
-                    cout << "insert key " << p->kbuf << " value " << p->vbuf << " success " << endl;
+                    ;
+                    //cout << "insert key " << p->kbuf << " value " << p->vbuf << " success " << endl;
                 }
             }
             else if (p->i == 1) { // 读操作
@@ -229,9 +252,10 @@ int main() {
                 it->Seek(p->kbuf);   // seek的时候，如果要seek的key不存在，则就seek到这个key之后第一个存在的key的位置
                 if (!it->Valid()) {
                     cout << "seek to " << p->kbuf << " failed " << it->status().ToString() << endl;
+                } else {
+                    cout << it->key().ToString() << " : " << it->value().ToString() << endl;
                 }
-                cout << it->key().ToString() << " : " << it->value().ToString() << endl;
-                delete it;
+                delete it;    // 为了测试生成的iterator没删的时候，rocksdb程序挂了，会不会有仅仅在iterator里的文件，被留下了了。测试完了，要把注释打开
             }
             else if (p->i == 7) {    // 新建columnfamily
                 ColumnFamilyHandle* cf;
@@ -367,6 +391,35 @@ int main() {
                         cout << "create checkpoint err " << status.ToString() << endl;
                     }
                 }
+            }
+            else if (p->i == 14) {    // seek and get then seek and get
+                cout << "seek key " << p->kbuf << endl;
+                rocksdb::Iterator* it = db->NewIterator(rocksdb::ReadOptions());
+                it->SeekToFirst();   // seek到第一个
+                if (!it->Valid()) {
+                    cout << "seek to first failed " << it->status().ToString() << endl;
+                }
+                cout << "1 " << it->key().ToString() << " : " << it->value().ToString() << endl;
+                it->Next();
+                cout << "2 " << it->key().ToString() << " : " << it->value().ToString() << endl;
+                it->SeekToFirst();   // seek到第一个
+                cout << "11 " << it->key().ToString() << " : " << it->value().ToString() << endl;
+                it->Next();
+                cout << "22 " << it->key().ToString() << " : " << it->value().ToString() << endl;
+                delete it;
+            } 
+            else if (p->i == 15) {   // 测试自己在rocksdb里面加的GetScore函数
+                struct timeval tv;
+                struct timezone tz;
+                gettimeofday(&tv, &tz);
+                cout << "before get default columnfamily" << tv.tv_sec << "." << tv.tv_usec << endl;
+                ColumnFamilyHandle* ch = db->DefaultColumnFamily();
+                gettimeofday(&tv, &tz);
+                cout << "before get score columnfamily" << tv.tv_sec << "." << tv.tv_usec <<  endl;
+                const char *result = ch->GetScore();
+                gettimeofday(&tv, &tz);
+                cout << "after get score columnfamily" << tv.tv_sec << "." << tv.tv_usec <<  endl;
+                cout << "score is: " << result << endl;
             }
         }
     }

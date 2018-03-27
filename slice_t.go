@@ -46,6 +46,14 @@ func main() {
 	fmt.Printf("%v", s1)
 	fmt.Println()
 	s2 = s1[2:]
-	fmt.Printf("%v", s2)
-	fmt.Printf("\n nil len is %d\n", len(nil))
+	//s2 = s1[2:50]  // 后面的下标不能越界
+	fmt.Printf("%v\n", s2)
+	//fmt.Printf("\n nil len is %d\n", len(nil))   // nil 不能用len
+	fmt.Println("======================================================")
+	var sl1 []int = []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 0}
+	fmt.Printf("aaa %v\n", sl1[:0])
+	fmt.Printf("bbb %v\n", sl1[9:])
+	var sl2 []int
+	sl2 = append(sl2, sl1[10:]...)
+	fmt.Printf("ccc %v\n", sl2)
 }

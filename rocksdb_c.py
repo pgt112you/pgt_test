@@ -1,3 +1,4 @@
+#coding:utf-8
 from struct import *
 import socket
 import time
@@ -9,36 +10,74 @@ s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.connect((HOST, PORT))
 
 
-
+# open db
 key = "qicheren11"
 value = "qcherenaa"
 fmstr = "i256s256s"
 content = pack(fmstr, 101, key, value)
 s.sendall(content)
+time.sleep(2)
 
-key = "changanqiche"
-value = "600069a"
-fmstr = "i256s256s"
-content = pack(fmstr, 0, key, value)
-s.sendall(content)
+## write into db
+#key = "changanqiche"
+#value = "000625"
+#fmstr = "i256s256s"
+#content = pack(fmstr, 0, key, value)
+#s.sendall(content)
+#
+#key = "changchengqiche"
+#value = "601633"
+#fmstr = "i256s256s"
+#content = pack(fmstr, 0, key, value)
+#s.sendall(content)
 
-key = "changanqiche"
-value = "600069a"
-fmstr = "i256s256s"
-content = pack(fmstr, 1, key, value)
-s.sendall(content)
+# seek and get
+#key = "changb"
+#value = "601633"
+#fmstr = "i256s256s"
+#content = pack(fmstr, 6, key, value)
+#s.sendall(content)
 
-key = "changanqi"
-value = "60006"
-fmstr = "i256s256s"
-content = pack(fmstr, 6, key, value)
-s.sendall(content)
+#key = "changd"    # 这个会报错，因为changchengqiche是最后一个key了，changd的话，超出rowkey的范围了，rocksdb会seek到一个不存在的位置
+#value = "601633"
+#fmstr = "i256s256s"
+#content = pack(fmstr, 6, key, value)
+#s.sendall(content)
 
+
+
+## get score
+#key = "jiajieshi"
+#value = "gaolujie"
+#fmstr = "i256s256s"
+#content = pack(fmstr, 15, key, value)
+#s.sendall(content)
+
+
+
+#key = "changanqiche"
+#value = "600069a"
+#fmstr = "i256s256s"
+#content = pack(fmstr, 1, key, value)
+#s.sendall(content)
+#
+#key = "changanqi"
+#value = "60006"
+#fmstr = "i256s256s"
+#content = pack(fmstr, 6, key, value)
+#s.sendall(content)
+#
 key = "changanqi"
 value = "60006"
 fmstr = "i256s256s"
 content = pack(fmstr, 13, key, value)
 s.sendall(content)
+
+#key = "changanqi"
+#value = "60006"
+#fmstr = "i256s256s"
+#content = pack(fmstr, 14, key, value)
+#s.sendall(content)
 
 #key = "qicheren12"
 #value = "qcherenaab"
@@ -79,20 +118,19 @@ s.sendall(content)
 #content = pack(fmstr, 1, key, value)
 #s.sendall(content)
 
-#for i in range(119650, 11330, -1):
+#for i in range(332121, 490562, 1):
 #    print i
-#    key = str(i) + str(i) + "jiajiajieshishi" + str(i)
+#    key = str(i) + "wuyongping" 
 #    value = "YAGAOchang1" + str(i)
 #    fmstr = "i256s256s"
 #    content = pack(fmstr, 0, key, value)
 #    s.sendall(content)
-#    key = str(i) + str(i) + "gaogaolujiejie" + str(i)
+#    key = str(i) + "huweiwei" 
 #    value = "YAGAOchang2" + str(i)
 #    fmstr = "i256s256s"
 #    content = pack(fmstr, 0, key, value)
 #    s.sendall(content)
 #
-
 
 #key = ""
 #value = ""
