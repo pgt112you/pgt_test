@@ -5,6 +5,11 @@
 #include <stdio.h>
 
 
+/*
+ * taskset shell 命令同样可以实现绑核的功能
+ * taskset 内部其实也是调用sched_setaffinity
+*/
+
 int main() {
     cpu_set_t   mask;
     CPU_ZERO(&mask);

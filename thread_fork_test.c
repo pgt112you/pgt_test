@@ -4,7 +4,7 @@
 
 void *func(void *arg) {
     printf("in thread %ld\n", pthread_self());
-    sleep(500);
+    sleep(50);
 }
 
 
@@ -19,7 +19,7 @@ int main() {
     int pid = fork();
 
     printf("111 pid is %d\n", getpid());
-    sleep(300);
+    sleep(30);
     if (pid > 0) {
         pthread_join(tid1, NULL);
         pthread_join(tid2, NULL);
@@ -27,7 +27,7 @@ int main() {
     }
 
     printf("before pid is %d\n", getpid());
-    sleep(500);
+    sleep(50);
     printf("pid is %d\n", getpid());
 
     if (pid != 0) {
