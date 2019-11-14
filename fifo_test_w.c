@@ -9,6 +9,11 @@
 #include <string.h>
 
 
+
+/*
+ * /proc/pid/fd里面对应的是fifo的文件路径
+*/
+
 int main() {
     int res = mkfifo("./test.fifo", S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH|S_IWOTH);
     if ((res < 0) && (errno != EEXIST)) {

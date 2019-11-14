@@ -5,6 +5,10 @@
 #include <unistd.h>
 #include <string.h>
 
+/*
+ * /proc/pid/fd里面对应的是pipe:[152466430]这种的,而且子进程和父进程都是,并且两个的中括号里面的数字一样的
+*/
+
 int main() {
     int pipefd[2];
     pid_t cpid;
